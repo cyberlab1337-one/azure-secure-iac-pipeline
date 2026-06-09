@@ -2,53 +2,57 @@
 
 ## Overview
 
-This project demonstrates how to deploy Azure infrastructure using Infrastructure as Code (IaC) with Bicep and Azure DevOps Pipelines.
+This project demonstrates a secure Azure Infrastructure as Code (IaC) deployment pipeline built with Bicep, Azure DevOps, and GitHub.
 
-The solution includes automated validation and deployment of Azure resources using environment-specific parameter files for Development and Production environments.
+The pipeline automatically validates, previews, and deploys Azure resources using environment-specific parameter files. The infrastructure includes a Virtual Network, Subnets, Network Security Group, and Storage Account.
 
-## Technologies
+## Key Skills Demonstrated
+* Infrastructure as Code (IaC) with Azure Bicep
+* CI/CD pipeline implementation with Azure DevOps
+* Azure infrastructure validation and automated deployment
+* Git and GitHub workflow for infrastructure management
+* Azure CLI automation
+* Environment-specific configuration management
 
-* Microsoft Azure
-* Bicep
-* Azure DevOps Pipelines
-* PowerShell
-* Git
+## Architecture
 
-## Project Structure
-
-* **main.bicep** – Defines Azure infrastructure resources.
-* **parameters.dev.json** – Development environment configuration.
-* **parameters.prod.json** – Production environment configuration.
-* **azure-pipelines.yml** – CI/CD pipeline definition.
-* **validate.ps1** – Infrastructure validation script.
-
-## Resources
-
-* VNet
-2 subnets:
-- app-subnet
-- management-subnet
-
-* NSG:
-- allow SSH/RDP only from your IP
-- deny unnecessary inbound traffic
-
-* Storage Account
-Log Analytics Workspace
-
-## Learning Objectives
-
-This project was created to practice:
-
-* Azure Infrastructure as Code with Bicep
-* CI/CD pipeline creation in Azure DevOps
-* Infrastructure validation and deployment automation
-* Git-based infrastructure management
+- Azure Resource Group
+- Virtual Network
+- Subnets
+- Network Security Group
+- Storage Account
 
 ## Deployment Flow
+```
+GitHub
+→ Azure DevOps
+→ Validate
+→ What-If
+→ Deploy
+→ Azure
+```
 
-1. Source code is retrieved from the repository.
-2. Infrastructure templates are validated.
-3. Bicep templates are compiled and checked.
-4. Azure resources are deployed using the selected parameter file.
-5. Deployment results and logs are generated.
+## Project Structure
+```
+azure-secure-iac-pipeline/
+├── infra/
+│   ├── main.bicep
+│   ├── parameters.dev.json
+│   └── parameters.prod.json
+├── pipelines/
+│   └── azure-pipelines.yml
+├── scripts/
+│   └── validate.ps1
+└── README.md
+└── images/
+    ├── azure-deployment-history.png
+    └── pipeline-success.png
+```
+
+## Successful Validate & Deploy Stage
+
+![Pipeline Stages](images/pipeline-success.png)
+
+## Azure Deployment History
+
+![Azure Deployment Status](images/azure-deployment-history.png)
