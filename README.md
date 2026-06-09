@@ -16,20 +16,28 @@ The pipeline automatically validates, previews, and deploys Azure resources usin
 
 ## Architecture
 
-- Azure Resource Group
-- Virtual Network
-- Subnets
-- Network Security Group
-- Storage Account
+```
+Resource Group
+├─ Virtual Network
+│  ├─ Application Subnet
+│  └─ Management Subnet
+├─ Network Security Group
+└─ Storage Account
+```
 
 ## Deployment Flow
 ```
 GitHub
-→ Azure DevOps
-→ Validate
-→ What-If
-→ Deploy
-→ Azure
+  ↓
+Azure DevOps Pipeline
+  ↓
+Bicep Validation
+  ↓
+What-If Analysis
+  ↓
+Deployment
+  ↓
+Azure Resource Group
 ```
 
 ## Project Structure
