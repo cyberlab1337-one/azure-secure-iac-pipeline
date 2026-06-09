@@ -3,16 +3,17 @@ targetScope='resourceGroup'
 @description('Deployment location')
 param location string = resourceGroup().location
 
-@description('Globally unique Storage Account name')
-param storageName string
+@description('Deployment environment name, for example dev, test, prod')
+param environment string
 
 @description('Public IP address allowed to SSH, in CIDR format, for example 1.2.3.4/32')
 param adminSourceIp string
 
-var virtualNetworkName = 'vnet-iac-dev-weu'
+var virtualNetworkName = 'vnet-iac-${environment}-weu'
 var subnet1Name = 'snet-app'
 var subnet2Name = 'snet-management'
-var nsgName = 'nsg-workload-dev-weu'
+var nsgName = 'nsg-workload-${environment}-weu'
+var storageName = 'stiac${environment}weu001'
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2025-01-01' = {
   name: virtualNetworkName
@@ -43,7 +44,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2025-01-01' = {
   }
 }
 
-resource nsg 'Microsoft.Network/networkSecurityGroups@2025-07-01' = {
+resource nsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: nsgName
   location: location
 

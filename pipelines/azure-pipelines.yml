@@ -1,0 +1,39 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  resourceGroupName: 'rg-iac-dev-weu'
+  templateFile: 'infra/main.bicep'
+  parametersFile: 'infra/parameters.dev.json'
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Validate Bicep infrastructure'
+    inputs:
+      azureSubscription: 'sc-rg-iac-dev-weu'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $adminSourceIp = "$(curl -s ifconfig.me)/32"
+
+        Write-Host "Building Bicep..."
+        az bicep build --file $(templateFile)
+
+        Write-Host "Validating deployment..."
+        az deployment group validate `
+          --resource-group $(resourceGroupName) `
+          --template-file $(templateFile) `
+          --parameters @$(parametersFile) `
+          --parameters adminSourceIp="$adminSourceIp"
+
+        Write-Host "Running what-if..."
+        az deployment group what-if `
+          --resource-group $(resourceGroupName) `
+          --template-file $(templateFile) `
+          --parameters @$(parametersFile) `
+          --parameters adminSourceIp="$adminSourceIp"
