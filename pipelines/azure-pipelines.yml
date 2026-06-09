@@ -7,33 +7,60 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  azureSubscription: 'sc-rg-iac-dev-weu'
   resourceGroupName: 'rg-iac-dev-weu'
   templateFile: 'infra/main.bicep'
   parametersFile: 'infra/parameters.dev.json'
 
-steps:
-  - task: AzureCLI@2
-    displayName: 'Validate Bicep infrastructure'
-    inputs:
-      azureSubscription: 'sc-rg-iac-dev-weu'
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        $adminSourceIp = "$(curl -s ifconfig.me)/32"
+stages:
+  - stage: Validate
+    displayName: 'Validate infrastructure'
+    jobs:
+      - job: ValidateBicep
+        displayName: 'Build, validate and what-if'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Validate Bicep infrastructure'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                $adminSourceIp = "$(curl -s ifconfig.me)/32"
 
-        Write-Host "Building Bicep..."
-        az bicep build --file $(templateFile)
+                az bicep build --file $(templateFile)
 
-        Write-Host "Validating deployment..."
-        az deployment group validate `
-          --resource-group $(resourceGroupName) `
-          --template-file $(templateFile) `
-          --parameters @$(parametersFile) `
-          --parameters adminSourceIp="$adminSourceIp"
+                az deployment group validate `
+                  --resource-group $(resourceGroupName) `
+                  --template-file $(templateFile) `
+                  --parameters @$(parametersFile) `
+                  --parameters adminSourceIp="$adminSourceIp"
 
-        Write-Host "Running what-if..."
-        az deployment group what-if `
-          --resource-group $(resourceGroupName) `
-          --template-file $(templateFile) `
-          --parameters @$(parametersFile) `
-          --parameters adminSourceIp="$adminSourceIp"
+                az deployment group what-if `
+                  --resource-group $(resourceGroupName) `
+                  --template-file $(templateFile) `
+                  --parameters @$(parametersFile) `
+                  --parameters adminSourceIp="$adminSourceIp"
+
+  - stage: Deploy
+    displayName: 'Deploy infrastructure'
+    dependsOn: Validate
+    condition: succeeded()
+    jobs:
+      - job: DeployBicep
+        displayName: 'Deploy Bicep infrastructure'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy Bicep to Azure'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                $adminSourceIp = "$(curl -s ifconfig.me)/32"
+
+                az deployment group create `
+                  --resource-group $(resourceGroupName) `
+                  --template-file $(templateFile) `
+                  --parameters @$(parametersFile) `
+                  --parameters adminSourceIp="$adminSourceIp"
